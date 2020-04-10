@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# === IMPORTANT ===
+# Before running the script make sure you have internet connection
+
+
 # Set up required variables
 # If any of the required variables is not set the installation will not start
 # e.g. drive=/dev/sda
@@ -15,7 +19,6 @@ root_part=
 boot_part_size=
 swap_part_size=
 home_part_size=
-root_part_size=
 
 
 # The function checks if a variable is set.
@@ -36,7 +39,6 @@ check() {
     is_set "boot_part_size" $boot_part_size
     is_set "swap_part_size" $swap_part_size
     is_set "home_part_size" $home_part_size
-    is_set "root_part_size" $root_part_size
 }
 
 partition_drive() {
@@ -95,7 +97,7 @@ install_system() {
 
     /usr/bin/reflector --protocol https --latest 30 --number 20 --sort rate --save /etc/pacman.d/mirrorlist
 
-    pacstrap /mnt base base-devel linux linux-firmware networkmanager wpa_supplicant vim
+    pacstrap /mnt base base-devel linux linux-firmware
 
     genfstab -U /mnt > /mnt/etc/fstab
 
@@ -112,12 +114,14 @@ full_install() {
     format_drive
     mount_drive
     install_system
+
+    # After installation chroot to the new system and run post-install.sh script
 }
 
 
 case $1 in
-    "init")
-        init
+    "check")
+        check
         ;;
     "partition")
         partition_drive

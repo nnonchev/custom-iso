@@ -59,21 +59,24 @@ set_hostname() {
 set_bootloader_efi() {
     echo "Set bootloader (grub EFI)..."
 
-    pacman -S --noconfirm grub efibootmgr intel-ucode
+    pacman -S --noconfirm grub efibootmgr
 
     grub-install --target=x86_64-efi --efi-directory="${esp}" --bootloader-id=grub
+    grub-mkconfig -o "${esp}/grub/grub.cfg"
+
+    pacman -S --noconfirm intel-ucode
     grub-mkconfig -o "${esp}/grub/grub.cfg"
 }
 
 allow_wheel() {
     echo "Allow wheel group users to use sudo..."
 
-    sed -i "s/#wheel ALL=(ALL) ALL/wheel ALL=(ALL) ALL/" /etc/locale.gen
+    sed -i "s/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/" /etc/sudoers
 }
 
 add_user() {
     echo "Adding user..."
-    useradd -m -g wheel,video -s /bin/bash $username
+    useradd -m -G wheel,video -s /bin/bash $username
 }
 
 install_xorg() {
@@ -84,8 +87,11 @@ install_xorg() {
     echo "[ -f /home/$username/.xprofile ] && . /home/$username/.xprofile" > /home/$username/.xinitrc
     echo "" >> /home/$username/.xinitrc
 
+    mkdir /home/$username/.config
+
     chown $username:$username /home/$username/.xinitrc
     chown $username:$username /home/$username/.xprofile
+    chown $username:$username /home/$username/.config
 }
 
 install_nvidia() {
@@ -93,13 +99,23 @@ install_nvidia() {
     pacman -S --noconfirm nvidia
 }
 
+install_network_manager() {
+    echo "Installing network manager..."
+    pacman -S wpa_supplicant networkmanager
+
+    systemctl enable NetworkManager
+}
+
+set_reflector() {
+    echo "Configure reflector service..."
+    cp misc/reflector.service /etc/systemd/system/
+
+    systemctl enable relfector.service
+}
+
 install_gnome() {
     echo "Installing gnome..."
     pacman -S --noconfirm gnome gnome-tweaks
-
-    cp -r /misc/.themes /home/$username/
-
-    chown -r $username:$username /home/$username/.themes 
 }
 
 install_gdm() {
@@ -115,6 +131,10 @@ install_terminal() {
 install_shell() {
     pacman -S --noconfirm zsh
     chsh -s /usr/bin/zsh $username
+}
+
+instalL_ide() {
+    pacman -S --noconfirm vi vim neovim
 }
 
 install_browser() {
@@ -143,6 +163,9 @@ full_install() {
     allow_wheel
     add_user
     install_xorg
+    install_nvidia
+    install_network_manager
+    set_reflector
     install_gnome
     install_gdm
     install_terminal
@@ -186,6 +209,12 @@ case $1 in
         ;;
     "nvidia")
         install_nvidia
+        ;;
+    "network-manager")
+        install_network_manager
+        ;;
+    "reflector")
+        set_reflector
         ;;
     "gnome")
         install_gnome
