@@ -734,9 +734,9 @@ StScrollBar {
   #panel #panelLeft, #panel #panelCenter {
     spacing: 4px; }
   #panel .panel-corner {
-    -panel-corner-radius: 6px;
+    -panel-corner-radius: 0px;
     -panel-corner-background-color: black;
-    -panel-corner-border-width: 2px;
+    -panel-corner-border-width: 0px;
     -panel-corner-border-color: transparent; }
     #panel .panel-corner:active, #panel .panel-corner:overview, #panel .panel-corner:focus {
       -panel-corner-border-color: #919191; }
