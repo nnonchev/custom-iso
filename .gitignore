@@ -1,2 +1,2 @@
-rereleng/out/*
-rereleng/work/*
+releng/out
+releng/work
