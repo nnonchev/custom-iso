@@ -1,2 +1,5 @@
 releng/out
 releng/work
+releng/airootfs/root/misc
+releng/airootfs/root/pre-install.sh
+releng/airootfs/root/post-install.sh
