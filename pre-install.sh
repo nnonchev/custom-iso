@@ -1,76 +1,91 @@
 #!/bin/sh
 
+# Set up required variables
+# If any of the required variables is not set the installation will not start
+# e.g. drive=/dev/sda
+drive=
 
-init() {
-    echo "Set up required variables..."
+# e.g. boot_part=$drive1 || boot_part=/dev/sda1
+boot_part=
+swap_part=
+home_part=
+root_part=
 
-    read -p "Select drive: " DRIVE_ID
-    DRIVE=/dev/${DRIVE_ID}
+# e.g. boot_part_size=550MiB || home_part_size=10GiB
+boot_part_size=
+swap_part_size=
+home_part_size=
+root_part_size=
 
-    BOOT_PART=${DRIVE}1
-    SWAP_PART=${DRIVE}2
-    HOME_PART=${DRIVE}3
-    ROOT_PART=${DRIVE}4
 
-    echo "Set size of form nMiB (e.g. 550MiB, 4GiB)"
-    read -p "Set boot partition size: " BOOT_PART_SIZE
-    read -p "Set swap partition size: " SWAP_PART_SIZE
-    read -p "Set home partition size: " HOME_PART_SIZE
+# The function checks if a variable is set.
+# If the variable is not set, the function will exit.
+#
+#   :param $1: string of the variable which needs to be set
+#   :param $1: variable to be checked
+is_set() {
+    [[ -z "$2" ]] && { echo "Error: $1 is not set"; exit 1; } || echo "$1: $2"
+}
 
-    echo "Partition drive: ${DRIVE}"
-    echo "Boot partition: ${BOOT_PART}, of size: ${BOOT_PART_SIZE}"
-    echo "Swap partition: ${SWAP_PART}, of size: ${SWAP_PART_SIZE}"
-    echo "Home partition: ${HOME_PART}, of size: ${HOME_PART_SIZE}"
-    echo "Root partition: ${ROOT_PART}, of size whatever's left"
+check() {
+    is_set "drive"          $drive
+    is_set "boot_part"      $boot_part
+    is_set "swap_part"      $swap_part
+    is_set "home_part"      $home_part
+    is_set "root_part"      $root_part
+    is_set "boot_part_size" $boot_part_size
+    is_set "swap_part_size" $swap_part_size
+    is_set "home_part_size" $home_part_size
+    is_set "root_part_size" $root_part_size
 }
 
 partition_drive() {
-    echo "Start partitioning..."
+    echo "start partitioning..."
 
-    echo "Wiping drive $DRIVE..."
-    sgdisk --zap-all $DRIVE
+    echo "wiping drive $drive..."
+    sgdisk --zap-all $drive
 
-    echo "Create partitions..."
+    echo "create partitions..."
     sgdisk --clear \
-        --new=1:0:+${BOOT_PART_SIZE}    --typecode=1:ef00 \
-        --new=2:0:+${SWAP_PART_SIZE}    --typecode=2:8200 \
-        --new=3:0:+${HOME_PART_SIZE}    --typecode=3:8300 \
+        --new=1:0:+${boot_part_size}    --typecode=1:ef00 \
+        --new=2:0:+${swap_part_size}    --typecode=2:8200 \
+        --new=3:0:+${home_part_size}    --typecode=3:8300 \
         --largest-new=4                 --typecode=4:8300 \
-        $DRIVE
+        $drive
 }
 
 format_drive() {
-    echo "Start formatting..."
+    echo "start formatting..."
 
-    echo "Format boot partition..."
-    mkfs.fat -F32 $BOOT_PART
+    echo "format boot partition..."
+    mkfs.fat -f32 $boot_part
 
-    echo "Create swap partition..."
-    mkswap $SWAP_PART
+    echo "create swap partition..."
+    mkswap $swap_part
 
-    echo "Create home partition"
-    mkfs.ext4 $HOME_PART
+    echo "create home partition"
+    mkfs.ext4 $home_part
 
-    echo "Create root partition"
-    mkfs.ext4 $ROOT_PART
+    echo "create root partition"
+    mkfs.ext4 $root_part
 }
 
 mount_drive() {
-    echo "Mount partitions..."
+    echo "mount partitions..."
 
-    echo "Mount root partition..."
-    mount $ROOT_PART /mnt
+    echo "mount root partition..."
+    mount $root_part /mnt
 
-    echo "Mount boot partition..."
+    echo "mount boot partition..."
     mkdir /mnt/boot
-    mount $BOOT_PART /mnt/boot
+    mount $boot_part /mnt/boot
 
-    echo "Mount home partition..."
+    echo "mount home partition..."
     mkdir /mnt/home
-    mount $HOME_PART /mnt/home
+    mount $home_part /mnt/home
 
-    echo "Mount swap partition..."
-    swapon $SWAP_PART
+    echo "mount swap partition..."
+    swapon $swap_part
 }
 
 install_system() {
@@ -84,8 +99,19 @@ install_system() {
 
     genfstab -U /mnt > /mnt/etc/fstab
 
+    cp ./pre-install.sh /mnt
     cp ./post-install.sh /mnt
     cp -r ./misc /mnt
+}
+
+
+full_install() {
+    check
+
+    partition_drive
+    format_drive
+    mount_drive
+    install_system
 }
 
 
@@ -104,6 +130,9 @@ case $1 in
         ;;
     "install")
         install_system
+        ;;
+    "full")
+        full_install
         ;;
     *)
         echo "Unknown option: ${1}"

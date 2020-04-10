@@ -121,8 +121,20 @@ install_browser() {
     pacman -S --noconfirm firefox-developer-edition chromium
 }
 
+clean() {
+    # Move pre-install.sh, post-install.sh scripts, and misc folder to the home folder of the user
+    # This will allow the user to examine exactly how the system has been installed and which files have been transfered
+    mkdir /home/$username/installation
+    mv pre-install.sh /home/$username/installation
+    mv post-install.sh /home/$username/installation
+    mv misc /home/$username/installation
+
+    chown $username:$username -R /home/$username/installation
+}
+
 full_install() {
     check
+
     set_timedate
     set_timezone
     set_locale
@@ -136,6 +148,8 @@ full_install() {
     install_terminal
     install_shell
     install_browser
+
+    clean
 }
 
 
@@ -187,6 +201,9 @@ case $1 in
         ;;
     "browser")
         install_browser
+        ;;
+    "clean")
+        clean
         ;;
     "full")
         full_install
