@@ -141,9 +141,9 @@ install_browser() {
     pacman -S --noconfirm firefox-developer-edition chromium
 }
 
+# Move pre-install.sh, post-install.sh scripts, and misc folder to the home folder of the user
+# This will allow the user to examine exactly how the system has been installed and which files have been transfered
 clean() {
-    # Move pre-install.sh, post-install.sh scripts, and misc folder to the home folder of the user
-    # This will allow the user to examine exactly how the system has been installed and which files have been transfered
     mkdir /home/$username/installation
     mv pre-install.sh /home/$username/installation
     mv post-install.sh /home/$username/installation
@@ -177,66 +177,26 @@ full_install() {
 
 
 case $1 in
-    "check")
-        check
-        ;;
-    "timedate")
-        set_timedate
-        ;;
-    "timezone")
-        set_timezone
-        ;;
-    "locale")
-        set_locale
-        ;;
-    "hostname")
-        set_hostname
-        ;;
-    "hostname")
-        set_hostname
-        ;;
-    "bootloader")
-        set_bootloader_efi
-        ;;
-    "wheel")
-        allow_wheel
-        ;;
-    "user")
-        add_user
-        ;;
-    "xorg")
-        install_xorg
-        ;;
-    "nvidia")
-        install_nvidia
-        ;;
-    "network-manager")
-        install_network_manager
-        ;;
-    "reflector")
-        set_reflector
-        ;;
-    "gnome")
-        install_gnome
-        ;;
-    "gdm")
-        install_gdm
-        ;;
-    "terminal")
-        install_terminal
-        ;;
-    "shell")
-        install_shell
-        ;;
-    "browser")
-        install_browser
-        ;;
-    "clean")
-        clean
-        ;;
-    "full")
-        full_install
-        ;;
-    *)
-        echo "Unknown option: ${1}"
+    "check")            check ;;
+    "timedate")         set_timedate ;;
+    "timezone")         set_timezone ;;
+    "locale")           set_locale ;;
+    "hostname")         set_hostname ;;
+    "hostname")         set_hostname ;;
+    "bootloader")       set_bootloader_efi ;;
+    "wheel")            allow_wheel ;;
+    "user")             add_user ;;
+    "xorg")             install_xorg ;;
+    "nvidia")           install_nvidia ;;
+    "network-manager")  install_network_manager ;;
+    "reflector")        set_reflector ;;
+    "gnome")            install_gnome ;;
+    "gdm")              install_gdm ;;
+    "terminal")         install_terminal ;;
+    "shell")            install_shell ;;
+    "ide")              install_ide ;;
+    "browser")          install_browser ;;
+    "clean")            clean ;;
+    "full")             full_install ;;
+    *)                  echo "Unknown option: ${1}"
 esac
