@@ -61,9 +61,10 @@ set_bootloader_efi() {
 
     pacman -S --noconfirm grub efibootmgr
 
-    grub-install --target=x86_64-efi --efi-directory="${esp}" --bootloader-id=grub
+    grub-install --target=x86_64-efi --efi-directory="${esp}" --bootloader-id=GRUB
     grub-mkconfig -o "${esp}/grub/grub.cfg"
 
+    # TODO Is it really needed???
     pacman -S --noconfirm intel-ucode
     grub-mkconfig -o "${esp}/grub/grub.cfg"
 }
@@ -101,7 +102,7 @@ install_nvidia() {
 
 install_network_manager() {
     echo "Installing network manager..."
-    pacman -S wpa_supplicant networkmanager
+    pacman -S --noconfirm wpa_supplicant networkmanager
 
     systemctl enable NetworkManager
 }
@@ -110,12 +111,33 @@ set_reflector() {
     echo "Configure reflector service..."
     cp misc/reflector.service /etc/systemd/system/
 
-    systemctl enable relfector.service
+    systemctl enable reflector.service
 }
 
+# TODO Not verified
 install_gnome() {
     echo "Installing gnome..."
     pacman -S --noconfirm gnome gnome-tweaks
+}
+
+# TODO Not verified
+install_kde() {
+    pacman -S --noconfirm plasma kde-applications
+    systemctl enable sddm
+
+    echo "exec startplasma-x11" >> /home/${username}/.xinitrc
+}
+
+install_awesome() {
+    pacman -S --noconfirm awesome
+
+    mkdir -p /home/${username}/.config/awesome
+    cp /etc/xdg/awesome/rc.lua /home/${username}/.config/awesome/
+    echo "exec awesome" >> /home/${username}/.xinitrc
+
+    chown ${username}:${username} /home/${username}/.xinitrc
+    chown -R ${username}:${username} /home/${username}/.config
+
 }
 
 install_gdm() {
@@ -133,7 +155,7 @@ install_shell() {
     chsh -s /usr/bin/zsh $username
 }
 
-instalL_ide() {
+install_ide() {
     pacman -S --noconfirm vi vim neovim
 }
 
@@ -166,7 +188,7 @@ full_install() {
     install_nvidia
     install_network_manager
     set_reflector
-    install_gnome
+    install_awesome
     install_gdm
     install_terminal
     install_shell
@@ -182,7 +204,6 @@ case $1 in
     "timezone")         set_timezone ;;
     "locale")           set_locale ;;
     "hostname")         set_hostname ;;
-    "hostname")         set_hostname ;;
     "bootloader")       set_bootloader_efi ;;
     "wheel")            allow_wheel ;;
     "user")             add_user ;;
@@ -191,6 +212,8 @@ case $1 in
     "network-manager")  install_network_manager ;;
     "reflector")        set_reflector ;;
     "gnome")            install_gnome ;;
+    "kde")              install_kde ;;
+    "awesome")          install_awesome ;;
     "gdm")              install_gdm ;;
     "terminal")         install_terminal ;;
     "shell")            install_shell ;;

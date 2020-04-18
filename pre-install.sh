@@ -60,16 +60,16 @@ format_drive() {
     echo "start formatting..."
 
     echo "format boot partition..."
-    mkfs.fat -f32 $boot_part
+    mkfs.fat -F32 $boot_part
 
     echo "create swap partition..."
     mkswap $swap_part
 
     echo "create home partition"
-    mkfs.ext4 $home_part
+    mkfs.ext4 -F $home_part
 
     echo "create root partition"
-    mkfs.ext4 $root_part
+    mkfs.ext4 -F $root_part
 }
 
 mount_drive() {
@@ -91,10 +91,10 @@ mount_drive() {
 }
 
 install_system() {
-    # Use reflector for faster installtion
     pacman -Sy
     pacman -S --noconfirm reflector
 
+    # Use reflector for faster installtion
     /usr/bin/reflector --protocol https --latest 30 --number 20 --sort rate --save /etc/pacman.d/mirrorlist
 
     pacstrap /mnt base base-devel linux linux-firmware
