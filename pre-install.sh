@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 # === IMPORTANT ===
 # Before running the script make sure you have internet connection
 
