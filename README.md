@@ -1,1 +1,1 @@
-# Arch Linux automated installed
+# Arch Linux automated installer
