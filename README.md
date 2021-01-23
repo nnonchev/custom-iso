@@ -1,1 +1,1 @@
-# custom-iso
+# Arch Linux automated installed
